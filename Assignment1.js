@@ -1,10 +1,13 @@
-let net = require('net');
-let fs = require('fs');
+let net = require("net");
+let fs = require("fs");
 let readline = require("readline");
-let args = require('minimist')(process.argv.slice(2));
+let args = require("minimist")(process.argv.slice(2));
 
 let configFile = "myhttpd.conf";
-let dir_path = "", fileName = "", currentInput = "", previousInput = "";
+var dir_path = "";
+var fileName = ""
+var currentInput = "";
+var previousInput = "";
 
 let date  = new Date().toString();
 
@@ -48,7 +51,6 @@ function processInput(inputStr, socket) {
 
 		currentInput = "";
 		previousInput = "";
-		fileName = "";
 		
 	} else {
 		currentInput += inputStr;
@@ -61,7 +63,7 @@ function processRequest(inputStr, socket) {
 	let httpRequest = request[0].trim().split(" ");
 	fileName = httpRequest[1];
 	
-	if (fileName.charAt(0) == "/" && (httpRequest[2].includes("HTTP/1.0") || httpRequest[2].includes("HTTP/1.1"))) { //checking to ensure the fileName includes a slash and has the correct HTTP version
+	if (fileName.charAt(0) == '/' && (httpRequest[2].includes("HTTP/1.0") || httpRequest[2].includes("HTTP/1.1"))) { //checking to ensure the fileName includes a slash and has the correct HTTP version
 		switch(httpRequest[0]) {
 			case "GET": // return header of the file + file contents
 				getFile(socket); 
@@ -104,13 +106,13 @@ function getFile(socket) {
 }
 
 function createFile(request, socket) {
-	let data;
+	let data = "";
 	try{
 		if (request[1].split(" ")[1] > 0) {
-			for (let i = 1; i < request.length; i++) {
-				data += request[i] + "\n";
+			for (let i = 2; i < request.length - 3; i++) {
+				if (data != undefined) data += request[i] + "\n";
 			}
-			
+
 			fs.appendFile(dir_path + fileName, data, function (err) {
 				if (err) throw err;
 				let response = "HTTP/1.0 201 Created\nContent-Length: " + data.length + "\nServer: pizza.scs.ryerson.ca\nConnection: close\nContent-Type: text/html; charset=utf-8\nDate: " + date.split(" (")[0] + "\nContent-Language: en-us\nLast-Modified: " + date.split(" (")[0];
